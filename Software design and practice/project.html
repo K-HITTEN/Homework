@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수강신청</title>
+    <script src = "..//jquery-3.7.0.min.js"></script>
+    <script src = "..//jquery-migrate-3.4.1.js"></script>
+    <style>
+        h1{
+            text-align: center
+        }
+        .page {
+            height: 800px;
+        }
+    </style>
+    <script>
+        var student_subject = [
+            {sid:'admin', eid:[0,1] , loginnumber: 0}
+        ]
+        var subject_table =[
+            {id: 1, name:'소프트웨어설계및실습' ,grade:3}
+        ]
+    </script>
+    <script>
+        $(document).ready(function(){
+        $('#title').css({
+            backgroundColor:'blue',
+            color:'white'
+        })
+        $('#manage').css({
+            backgroundColor:'red',
+            color:'white'
+        })
+        $('#apply').css({
+            backgroundColor:'gray',
+            color:'black'
+        })
+        function initializeTable(){
+            var table = $('#subjectTable');
+            var tables = $('#subjectTables');
+            table.empty();
+            tables.empty();
+            subject_table.sort(function(a,b){
+                return a.id - b.id;
+            });
+            var thead = $('<thead>').appendTo(table);
+            var headerRow = $('<tr>').appendTo(thead);
+            $('<th>').text('ID').appendTo(headerRow);
+            $('<th>').text('과목명').appendTo(headerRow);
+            $('<th>').text('학점').appendTo(headerRow);
+            $('<th>').text('action').appendTo(headerRow);
+            var tbody = $('<tbody>').appendTo(table);
+            for(let i = 0; i < subject_table.length; i++){
+                var rowData = subject_table[i];
+                var row = $('<tr>').appendTo(tbody);
+                $('<td>').text(rowData.id).appendTo(row);
+                $('<td>').text(rowData.name).appendTo(row);
+                $('<td>').text(rowData.grade).appendTo(row);
+                var actionsCell = $('<td>').appendTo(row);
+                $('<button>').text('Delete').addClass('btn-delete').data('index', i).appendTo(actionsCell);
+            }
+            
+            var theads = $('<thead>').appendTo(tables);
+            var headerRows = $('<tr>').appendTo(theads);
+            $('<th>').text('ID').appendTo(headerRows);
+            $('<th>').text('과목명').appendTo(headerRows);
+            $('<th>').text('학점').appendTo(headerRows);
+            var tbodys = $('<tbody>').appendTo(tables);
+            for(let i = 0; i < subject_table.length; i++){
+                var rowDatas = subject_table[i];
+                var rows = $('<tr>').appendTo(tbodys);
+                $('<td>').text(rowDatas.id).appendTo(rows);
+                $('<td>').text(rowDatas.name).appendTo(rows);
+                $('<td>').text(rowDatas.grade).appendTo(rows);
+            } 
+        }
+
+        $('#btn-add').click(function() {
+        var id = parseInt($('#input-id').val());
+        var name = $('#input-name').val();
+        var grade = parseInt($('#input-grade').val());
+        var newRowData = {
+          id: id,
+          name: name,
+          grade: grade,
+        };
+        subject_table.push(newRowData);
+        initializeTable();
+      });
+
+      $(document).on('click', '.btn-delete', function() {
+        var index = $(this).data('index');
+        subject_table.splice(index, 1);
+        initializeTable();
+      });
+
+      initializeTable();
+    });
+    var login_idnumber
+    let idList = ["admin"];
+    let pwList = ["admin"];
+    function login_chk(myForm){
+        let userid = document.getElementById("user_id").value;
+        let password = document.getElementById("user_pw").value;
+        for(var i = 0; i<idList.length; i++){
+            if (userid == idList[i] && password == pwList[i]) {
+                login_idnumber = i;
+                alert("로그인 성공!");
+                if(login_idnumber == 0){
+                    scrollToDiv('manage');
+                }else{
+                    scrollToDiv('apply');
+                }
+                $("<h2></h2>").text(idList[login_idnumber]+"님 환영합니다").appendTo('#apply2')
+                $("<h3></h3>").text(idList[login_idnumber]+"님의 수강신청 목록").appendTo('#apply3')
+                student_subject[login_idnumber].loginnumber++;
+                for(let j = 0; j <student_subject[login_idnumber].eid.length; j++){
+                    for(let  k = 0; k< subject_table.length; k++){
+                        if(student_subject[login_idnumber].eid[j] == subject_table[k].id){
+                            $("<li></li>").text(subject_table[k].name).appendTo('#apply3')
+                        }
+                    }
+                }
+                document.getElementById('user_id').value = '';
+                document.getElementById('user_pw').value = '';
+                return;
+            }else {
+                continue
+            }
+        }
+        alert("잘못된 사용자 이름 또는 비밀번호입니다.");
+        document.getElementById('user_id').value = '';
+        document.getElementById('user_pw').value = '';
+    }
+    function submit_chk(myForm){
+        let userid = document.getElementById("users_id").value;
+        let password = document.getElementById("users_pw").value;
+        let tmp1 = /^[0-9]{7}$/
+        let tmp2 = /^(?=.*?[A-Za-z])(?=.*?[0-9])(?=.*[!@#$%^&*]).{8,}$/gi
+        if(tmp1.test(userid)==true){
+            if(tmp2.test(password)==true){}
+            else{
+                alert("비밀번호는 8자 이상을 입력하시오. 영문자, 숫자, 특수문자를 각각 최소 하나 이상 조합하시오.")
+                return false;
+            }
+        }
+        else {
+            alert("학번은 숫자만 7글자 입력하시오")
+            return false;
+        }
+        for(var i = 0; i<idList.length; i++){
+               if(userid == idList[i]){
+            alert("아이디가 중복됩니다");
+            document.getElementById('users_id').value = '';
+            document.getElementById('users_pw').value = '';
+            document.f1.user_name.focus();  
+            return;
+           }
+        }
+        alert("가입성공!!")
+        idList.push(userid);
+        pwList.push(password);
+        document.getElementById('users_id').value = '';
+        document.getElementById('users_pw').value = '';
+        var sign_up = document.getElementById("signup");
+        sign_up.style.visibility = "hidden"
+        var newData = {
+            sid: userid,
+            eid:[0],
+            loginnumber:0
+        };
+        student_subject.push(newData);
+    }
+    </script>
+</head>
+<body>
+    <h1 id = "title"><img src="img/donga.png" width="50" height="50">  동아대 수강신청</h1>
+    <div class="page">
+        <div id="login">
+            <fieldset>
+                <legend>로그인</legend>
+                <p>
+                    <label for ="user_id">ID</label>
+                    <input type="text" name = "user_id" id = "user_id"/>
+                </p>
+                <p>
+                    <label for ="user_pw">PW</label>
+                    <input type="password" name = "user_pw" id = "user_pw"/>
+                </p>
+                <p>
+                    <input type = "submit" value = "로그인" onclick="login_chk(this.form);" required>
+                    <input type = "button" value = "회원가입" onclick= "show_signup()" required> 
+                </p>
+            </fieldset>
+        </div>
+        <p>
+        <div id="signup" style="visibility: hidden">
+            <fieldset>
+                <legend>회원가입</legend>
+                <p>
+                    <label for ="users_id">ID</label>
+                    <input type="text" name = "users_id" id = "users_id"/>
+                </p>
+                <p>
+                    <label for ="users_pw">PW</label>
+                    <input type="password" name = "users_pw" id = "users_pw"/>
+                </p>
+                <p>
+                    <input type = "submit" value = "회원가입" onclick="submit_chk(this.form);" required>
+                    <input type="reset" value = "가입취소" onclick="hide_signup();" required>
+                </p>
+            </fieldset>
+        </div>
+    </div> 
+    <h1 id="manage" >관리 페이지</h1>
+    <div class="page">
+        <fieldset>
+            <legend>관리자모드</legend>
+            <p>
+                <input type = "button" value = "교과목 관리" onclick="subject_manage()"/>
+                <input type = "button" value = "회원 관리" onclick="people_manage()"/>
+            </p>
+        </fieldset>
+        <p>
+        <div id = "subjectManage" style="visibility: hidden">
+            <fieldset>
+                <legend>교과목 관리</legend>
+                <table id ="subjectTable">
+                </table>
+                <form>
+                    <label>ID:</label>
+                    <input type="number" id="input-id" required>
+                    <label>Name:</label>
+                    <input type="text" id="input-name" required>
+                    <label>Grade:</label>
+                    <input type="number" id="input-grade" required>
+                    <button type="button" id="btn-add">추가</button>
+                </form>
+            </fieldset>
+            <input type = "button" value = "숨기기" onclick="hide_sm()"/>
+        </div>
+        <p>
+        <div id = "peopleManage" style="visibility: hidden">
+            <fieldset>
+                <legend>회원 관리</legend>
+                <label>검색할 학번:</label>
+                <input type="text" id="gradenumber"required>
+                <button type="button" id="searchnumber" onclick="search_number()">검색</button>
+                <div id = "searchresult">
+
+                </div>
+            </fieldset>
+            <input type = "button" value = "숨기기" onclick="hide_pm()"/>
+        </div>
+        <button type="button" onclick="logout()">로그아웃</button>
+    </div>
+    <h1 id="apply">수강 신청</h1>
+    <div class="page">
+        <div id = "apply2">
+
+        </div>
+        <p>
+        <h3>개설된 수강 신청 테이블</h3>
+        <table id ="subjectTables">
+        </table>
+        <div id = "apply3">
+        
+        </div>
+        <p>
+        <label>과목 코드:</label>
+        <input type="number" id="enrolenumber"required>
+        <button  onclick="add_Enrolenumber()">추가</button>
+        <button onclick="remove_Enrolenumber()">삭제</button>
+        <p>
+        <button type="button" onclick="logout()">로그아웃</button>
+    </div>
+    <script>
+        function show_signup(){
+            var sign_up = document.getElementById("signup");
+            sign_up.style.visibility = "visible"
+        }
+        function hide_signup(){
+            var sign_up = document.getElementById("signup");
+            sign_up.style.visibility = "hidden"
+        }
+        function subject_manage(){
+            var subject = document.getElementById("subjectManage");
+            subject.style.visibility = "visible"
+        }
+        function hide_sm(){
+            var sign_up = document.getElementById("subjectManage");
+            sign_up.style.visibility = "hidden"
+        }
+        function people_manage(){
+            var sign_up = document.getElementById("peopleManage");
+            sign_up.style.visibility = "visible"
+        }
+        function hide_pm(){
+            var sign_up = document.getElementById("peopleManage");
+            sign_up.style.visibility = "hidden"
+        }
+        function add_Enrolenumber(){
+            var enrol_number = document.getElementById("enrolenumber").value;
+            for(let i = 0; i<student_subject[login_idnumber].eid.length; i++){
+                console.log(enrol_number+"     "+student_subject[login_idnumber].eid[i]);
+                if(enrol_number == student_subject[login_idnumber].eid[i]){
+                    alert("이미 수강신청한 과목코드입니다!");
+                    return; 
+                }
+            }
+            student_subject[login_idnumber].eid.push(enrol_number);
+            student_subject[login_idnumber].eid.sort(function(a,b){
+                return a - b;
+            });
+            $('#apply3').empty();
+            $("<h3></h3>").text(idList[login_idnumber]+"님의 수강신청 목록").appendTo('#apply3')
+                for(let j = 0; j <student_subject[login_idnumber].eid.length; j++){
+                    for(let  k = 0; k< subject_table.length; k++){
+                        if(student_subject[login_idnumber].eid[j] == subject_table[k].id){
+                            $("<li></li>").text(subject_table[k].name).appendTo('#apply3')
+                        }
+                    }
+                }
+        }
+        function remove_Enrolenumber(){
+            let enrol_number = document.getElementById("enrolenumber").value;
+            for(let i = 0; i<student_subject[login_idnumber].eid.length; i++){
+                if(enrol_number == student_subject[login_idnumber].eid[i]){
+                    console.log(enrol_number+"     "+student_subject[login_idnumber].eid[i]);
+                    student_subject[login_idnumber].eid.splice(i,1);
+                    $('#apply3').empty();
+                    $("<h3></h3>").text(idList[login_idnumber]+"님의 수강신청 목록").appendTo('#apply3')
+                    for(let j = 0; j <student_subject[login_idnumber].eid.length; j++){
+                        for(let  k = 0; k< subject_table.length; k++){
+                            if(student_subject[login_idnumber].eid[j] == subject_table[k].id){
+                                $("<li></li>").text(subject_table[k].name).appendTo('#apply3')
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+            alert("일치하는 과목 코드가 없습니다!");
+        }
+        function scrollToDiv(Id){
+            let element = document.getElementById(Id);
+            element.scrollIntoView({behavior:'auto'});
+        }
+        function logout(){
+            scrollToDiv('title');
+            hide_sm();
+            hide_pm();
+            $('#apply2').empty();
+            $('#apply3').empty();
+            $('#searchresult').empty();
+        }
+        function search_number(){
+            var searchingnumber = document.getElementById("gradenumber").value;
+            for(let i =0; i<student_subject.length; i++){
+                if(searchingnumber == student_subject[i].sid){
+                    $("<h4></h4>").text("학번: "+searchingnumber).appendTo('#searchresult')
+                    $("<h4></h4>").text("비밀번호: "+pwList[i]).appendTo('#searchresult')
+                    $("<h4></h4>").text("로그인 횟수: "+student_subject[i].loginnumber).appendTo('#searchresult')
+                    $("<h4></h4>").text("수강하는 과목").appendTo('#searchresult')
+                    for(let j = 0; j<student_subject[i].eid.length; j++){
+                        for(let  k = 0; k< subject_table.length; k++){
+                            if(student_subject[i].eid[j] == subject_table[k].id){
+                                $("<li></li>").text(subject_table[k].name).appendTo('#searchresult')
+                            }
+                        }
+                    }
+                    $("<h5></h5>").text("비밀번호 변경:").appendTo('#searchresult');
+                    $('<input>').attr('type','password').attr('id','exchangepw').appendTo('#searchresult');
+                    $('<button>').text("확인").attr('type','button').attr('id','exchange_pw').appendTo('#searchresult');
+                    $("#exchange_pw").click(function(){
+                        var changepw = document.getElementById("exchangepw").value;
+                        let tmp = /^(?=.*?[A-Za-z])(?=.*?[0-9])(?=.*[!@#$%^&*]).{8,}$/gi
+                        if(tmp.test(changepw)==true){
+                            pwList[i] = changepw;
+                            alert("비밀번호 변경에 성공하였습니다!")
+                            document.getElementById("gradenumber").value = "";
+                            $('#searchresult').empty();
+                        }
+                        else{
+                            alert("비밀번호는 8자 이상을 입력하시오. 영문자, 숫자, 특수문자를 각각 최소 하나 이상 조합하시오.")
+                            return false;
+                        }
+                    });
+                    $('<br>').appendTo('#searchresult');
+                    $('<button>').text("삭제").attr('type','button').attr('id','remove_member').appendTo('#searchresult');
+                    $("#remove_member").click(function(){
+                        idList.splice(i,1);
+                        pwList.splice(i,1);
+                        student_subject.splice(i,1);
+                        alert("회원이 최종 탈퇴 처리되었습니다!")
+                        document.getElementById("gradenumber").value = "";
+                        $('#searchresult').empty();
+                    });
+                    return;
+                }
+            }
+            alert("일치하는 학번이 없습니다.");
+        }
+    </script>
+</body>
+</html>
